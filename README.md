@@ -4,11 +4,13 @@ A introdução de um braço robótico em linhas de produção tem como principal
 
 <img src="https://github.com/user-attachments/assets/11d431b1-d4c4-4bc0-b99f-0444af27bfd6" width="400">
 
-O prjeto em questão visa aprimorar uma esteira de produção já existente, que atualmente conta com sensores de cor, temperatura e velocidade, com a implementação de um braço robótico para realizar a separação automatizada de objetos com base em um parâmetro do processo.
+Figura 1 - Braços roboticos em uma linha de produção
+
+O prjeto em questão visa aprimorar uma esteira de produção já existente, que atualmente conta com sensores de cor, temperatura e velocidade, com a implementação de um braço robótico, Figura 2, para realizar a separação automatizada de objetos com base em um parâmetro do processo.
 
 <img src="https://github.com/user-attachments/assets/2f2f6335-15a8-49d5-81bf-b9f8ea3d4abf" width="400">
 
-Figura 1 - Braço robótico
+Figura 2 - Braço robótico que será implementado
 
 Para alcançar esses objetivos, o projeto buscará primeiramente compreender as tecnologias existentes na esteira, além de se aprofundar nas técnicas de controle de motores e nas lógicas de funcionamento baseadas nas leituras dos sensores, tendo como principal objetico o controle e entendimento do braço mecanico. O sistema de controle será desenvolvido de modo que o braço robótico execute movimentos programados para separar objetos conforme os critérios definidos pelo sensor de cor, ou por outro sensor integrado na esteira.
 
