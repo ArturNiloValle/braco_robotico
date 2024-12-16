@@ -224,6 +224,10 @@ void moveLento(Servo& servo, int posicao) {
 ```
 O programa realizado define as posições iniciais dos servos e os movimentos que ele precisa realizar para se mover para a direita ou para a esquerda utilizando funções com as posições específicas de cada motor. A decisão da direção ainda não é feita automaticamente e está sendo configurada manualmente para a realização dos testes.
 A proxima etapa consiste em definir critérios para a decisão da direção do movimento e definir um procedimento de calibração para configurar as posições iniciais e finais de cada movimento.
+Segue uma imagem do teste realizado com este código.
+
+![image](https://github.com/user-attachments/assets/c0f101f9-230e-4204-aac6-f28f405521b6)
+
 
 ### Prototipação de shield para arduino
 
@@ -238,3 +242,10 @@ Abaixo seguem as figuras ilustrando a placa desenvolvida e a conexão com o mód
 ![image](https://github.com/user-attachments/assets/f2cdf7f5-9daf-4c10-a092-15f8c6b9f4d7)
 ![image](https://github.com/user-attachments/assets/3d41291f-37d8-4331-89d3-92f3082d6c30)
 
+### Proximos passos
+Ainda faltam algumas etapas de desenvolvimento para a implementação do sistema completo na esteira. Os proximos passos são os seguintes:
+- Fabricar a placa do shield e testar com o código já realizado
+- Mellhorar a movimentação e definir critérios para calibração das posições iniciais e finais
+- Definir a quantidade de movimentos possíveis (verificar se mais movimentos são necessários)
+- Pensar na lógica para determinação da direção do movimento (Variaveis de entrada como cor do objeto, ou via comando)]
+- Integrar ao sistema da esteira
