@@ -12,10 +12,10 @@
 
 
 // Definição dos pinos dos servos
-const int basePin = 9;
-const int eixo1Pin = 10;
-const int eixo2Pin = 11;
-const int garraPin = 12;
+const int basePin = 3;
+const int eixo1Pin = 5;
+const int eixo2Pin = 9;
+const int garraPin = 11;
 
 // Criando objetos para os servos
 Servo base;
