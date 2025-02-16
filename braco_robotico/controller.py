@@ -3,6 +3,8 @@ import serial.tools.list_ports
 import time
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+import threading
+
 
 class RoboControlApp:
     def __init__(self, root):
@@ -166,7 +168,7 @@ class RoboControlApp:
             return
 
         # Agenda a próxima chamada após 250 ms e guarda o ID para poder cancelar
-        self.increment_after_id = self.root.after(150, self.do_increment)
+        self.increment_after_id = self.root.after(50, self.do_increment)
 
     def stop_increment(self, event):
         """Interrompe o loop de incremento contínuo."""
@@ -235,11 +237,15 @@ class RoboControlApp:
             self.send_button.config(state="normal")
 
     def executar_comandos(self):
-        """Executa os comandos armazenados em um arquivo."""
+        """Executa os comandos armazenados em um arquivo em uma thread separada."""
         if not self.filename:
             messagebox.showerror("Erro", "Selecione um arquivo primeiro!")
             return
 
+        threading.Thread(target=self._executar_comandos_thread).start()
+
+    def _executar_comandos_thread(self):
+        """Função que executa os comandos do arquivo em uma thread separada."""
         try:
             with open(self.filename, 'r') as arquivo:
                 for linha in arquivo:
@@ -251,18 +257,25 @@ class RoboControlApp:
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao executar comandos: {str(e)}")
 
+
     def listar_portas(self):
         """Lista todas as portas seriais disponíveis."""
         ports = serial.tools.list_ports.comports()
         return [port.device for port in ports]
 
     def enviar_comando(self, comando):
-        """Envia um comando via serial."""
+        """Envia um comando via serial em uma thread separada."""
         if self.arduino:
-            self.arduino.write(f"{comando}\n".encode())
-            print(f"Enviado: {comando}")
+            # Cria uma thread para enviar o comando
+            threading.Thread(target=self._send_command_thread, args=(comando,)).start()
         else:
             messagebox.showerror("Erro", "Conecte primeiro ao Arduino!")
+
+    def _send_command_thread(self, comando):
+        """Função que realiza o envio do comando via serial."""
+        self.arduino.write(f"{comando}\n".encode())
+        print(f"Enviado: {comando}")
+
 
     def desconectar_serial(self):
         """Fecha a conexão serial e sai do programa."""
