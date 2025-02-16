@@ -3,7 +3,7 @@
 #include "QueueArray.h"  // Biblioteca da fila
 
 #define DELAYT 10        // Tempo entre cada passo de movimento
-#define MAX_FILA 10      // Capacidade da fila
+#define MAX_FILA 50      // Capacidade da fila
 
 // Definição dos pinos dos servos
 const int basePin = 3;
@@ -38,8 +38,11 @@ void roboInit() {
     eixo1.attach(eixo1Pin);
     eixo2.attach(eixo2Pin);
     garra.attach(garraPin);
-
-    moveLentoSimultaneo(basePos, eixo1Pos, eixo2Pos, garraPos);
+    delay(1000);
+    base.write(basePos);
+    eixo1.write(eixo1Pos);
+    eixo2.write(eixo2Pos);
+    garra.write(garraPos);
     delay(500);
 }
 
