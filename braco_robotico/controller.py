@@ -2,16 +2,19 @@ import serial
 import serial.tools.list_ports
 import time
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, messagebox, filedialog
 
 class RoboControlApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Controle do Braço Robótico")
-        
+
         self.arduino = None
         self.selected_port = tk.StringVar()
-        self.filename = ""
+
+        # Armazena os ângulos atuais dos motores
+        self.angles = {"B": 90, "M": 90, "S": 90, "G": 90}
+        self.saved_positions = []  # Lista para armazenar posições salvas
 
         self.janela_selecao_serial()  # Inicia com a seleção da serial
 
@@ -63,29 +66,28 @@ class RoboControlApp:
         ttk.Button(frame_menu, text="Desconectar e Sair", command=self.desconectar_serial).pack(pady=5)
 
     def janela_controle_manual(self):
-        """Janela para controle manual dos servos."""
+        """Janela para controle manual dos motores, ajustando os ângulos com '+' e '-'."""
         for widget in self.root.winfo_children():
             widget.destroy()
 
         frame_manual = ttk.LabelFrame(self.root, text="Controle Manual")
         frame_manual.pack(padx=20, pady=20, fill="both", expand=True)
 
-        ttk.Label(frame_manual, text="Movimente os servos:", font=("Arial", 12)).pack(pady=10)
+        ttk.Label(frame_manual, text="Ajuste os ângulos dos motores:", font=("Arial", 12)).pack(pady=10)
 
-        self.add_botao_movimento(frame_manual, "Base Esquerda", "B180")
-        self.add_botao_movimento(frame_manual, "Base Direita", "B0")
-        self.add_botao_movimento(frame_manual, "Eixo Medio Cima", "M0")
-        self.add_botao_movimento(frame_manual, "Eixo Medio Baixo", "M180")
-        self.add_botao_movimento(frame_manual, "Eixo Superior Cima", "S0")
-        self.add_botao_movimento(frame_manual, "Eixo Superior Baixo", "S180")
-        self.add_botao_movimento(frame_manual, "Abrir Garra", "G180")
-        self.add_botao_movimento(frame_manual, "Fechar Garra", "G0")
+        motores = [("Base", "B"), ("Eixo Médio", "M"), ("Eixo Superior", "S"), ("Garra", "G")]
 
+        for nome, codigo in motores:
+            frame_motor = ttk.Frame(frame_manual)
+            frame_motor.pack(pady=5)
+
+            ttk.Label(frame_motor, text=f"{nome} ({self.angles[codigo]}°)").pack(side="left", padx=5)
+
+            ttk.Button(frame_motor, text="-", command=lambda c=codigo: self.ajustar_angulo(c, -5)).pack(side="left", padx=5)
+            ttk.Button(frame_motor, text="+", command=lambda c=codigo: self.ajustar_angulo(c, 5)).pack(side="left", padx=5)
+
+        ttk.Button(frame_manual, text="Salvar Posição Atual", command=self.salvar_posicao).pack(pady=10)
         ttk.Button(frame_manual, text="Voltar ao Menu", command=self.main_menu).pack(pady=10)
-
-    def add_botao_movimento(self, parent, texto, comando):
-        """Cria um botão para enviar um comando manual."""
-        ttk.Button(parent, text=texto, command=lambda: self.enviar_comando(comando)).pack(pady=3)
 
     def janela_arquivo_comandos(self):
         """Janela para carregar e executar arquivo de comandos."""
@@ -101,15 +103,10 @@ class RoboControlApp:
         self.browse_button = ttk.Button(frame_arquivo, text="Selecionar Arquivo", command=self.selecionar_arquivo)
         self.browse_button.pack(pady=5)
 
-        self.send_button = ttk.Button(frame_arquivo, text="Enviar Comandos", command=self.enviar_comandos, state="disabled")
+        self.send_button = ttk.Button(frame_arquivo, text="Executar Comandos", command=self.executar_comandos, state="disabled")
         self.send_button.pack(pady=5)
 
         ttk.Button(self.root, text="Voltar ao Menu", command=self.main_menu).pack(pady=10)
-
-    def listar_portas(self):
-        """Lista todas as portas seriais disponíveis."""
-        ports = serial.tools.list_ports.comports()
-        return [port.device for port in ports]
 
     def selecionar_arquivo(self):
         """Abre um seletor de arquivos para escolher o arquivo de comandos."""
@@ -118,8 +115,8 @@ class RoboControlApp:
             self.file_label.config(text=self.filename)
             self.send_button.config(state="normal")
 
-    def enviar_comandos(self):
-        """Lê o arquivo e envia os comandos via serial."""
+    def executar_comandos(self):
+        """Executa os comandos armazenados em um arquivo."""
         if not self.filename:
             messagebox.showerror("Erro", "Selecione um arquivo primeiro!")
             return
@@ -130,10 +127,33 @@ class RoboControlApp:
                     comando = linha.strip()
                     if comando:
                         self.enviar_comando(comando)
-                        time.sleep(1)
-            messagebox.showinfo("Sucesso", "Comandos enviados com sucesso!")
+                        time.sleep(0.1)
+            messagebox.showinfo("Sucesso", "Comandos executados!")
         except Exception as e:
-            messagebox.showerror("Erro", f"Falha ao enviar comandos: {str(e)}")
+            messagebox.showerror("Erro", f"Falha ao executar comandos: {str(e)}")
+
+    def ajustar_angulo(self, motor, incremento):
+        """Ajusta o ângulo do motor e envia o comando via serial."""
+        novo_angulo = self.angles[motor] + incremento
+        if 0 <= novo_angulo <= 180:
+            self.angles[motor] = novo_angulo
+            self.enviar_comando(f"{motor}{novo_angulo}")
+
+        self.janela_controle_manual()  # Atualiza a interface para exibir o novo ângulo
+
+    def salvar_posicao(self):
+        """Salva a posição atual dos motores em um arquivo."""
+        self.saved_positions.append(f"B{self.angles['B']} M{self.angles['M']} S{self.angles['S']} G{self.angles['G']}\n")
+
+        with open("posicoes_salvas.txt", "w") as f:
+            f.writelines(self.saved_positions)
+
+        messagebox.showinfo("Sucesso", "Posição salva!")
+
+    def listar_portas(self):
+        """Lista todas as portas seriais disponíveis."""
+        ports = serial.tools.list_ports.comports()
+        return [port.device for port in ports]
 
     def enviar_comando(self, comando):
         """Envia um comando via serial."""
