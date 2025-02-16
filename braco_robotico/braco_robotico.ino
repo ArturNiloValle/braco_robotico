@@ -46,36 +46,47 @@ void roboInit() {
     delay(500);
 }
 
-void loop() {
-    // 1) Verifica se há dados na Serial
-    if (Serial.available() > 0) {
-        // 2) Lê uma linha inteira até '\n'
-        String line = Serial.readStringUntil('\n');
-        line.trim(); // Remove espaços e \r extras
+unsigned long lastTime = 0;
+unsigned long delayTime = DELAYT;
 
-        // 3) Se a linha não estiver vazia, armazena na fila
-        if (line.length() > 0) {
-            if (!comandoQueue.isFull()) {
-                // Aloca memória e copia a linha
-                char *novoComando = (char*)malloc(line.length() + 1);
-                strcpy(novoComando, line.c_str());
-                
-                comandoQueue.push(novoComando);  
-                Serial.print("Comando armazenado: ");
-                Serial.println(novoComando);
-            } else {
-                Serial.println("Fila de comandos cheia! Aguarde o processamento.");
+void loop() {
+    unsigned long currentMillis = millis();
+
+    // Verifica se passou o tempo de delay para o próximo passo
+    if (currentMillis - lastTime >= delayTime) {
+        lastTime = currentMillis;
+
+        // 1) Verifica se há dados na Serial
+        if (Serial.available() > 0) {
+            // 2) Lê uma linha inteira até '\n'
+            String line = Serial.readStringUntil('\n');
+            line.trim(); // Remove espaços e \r extras
+
+            // 3) Se a linha não estiver vazia, armazena na fila
+            if (line.length() > 0) {
+                if (!comandoQueue.isFull()) {
+                    // Aloca memória e copia a linha
+                    char *novoComando = (char*)malloc(line.length() + 1);
+                    strcpy(novoComando, line.c_str());
+                    
+                    comandoQueue.push(novoComando);  
+                    Serial.print("Comando armazenado: ");
+                    Serial.println(novoComando);
+                } else {
+                    Serial.println("Fila de comandos cheia! Aguarde o processamento.");
+                }
             }
         }
-    }
 
-    // 4) Se a fila não estiver vazia, processa o próximo comando
-    if (!comandoQueue.isEmpty()) {
-        char* comandoAtual = comandoQueue.pop();  // Retira um comando da fila
-        processarComando(comandoAtual);
-        free(comandoAtual);  // Libera memória alocada após uso
+        // 4) Se a fila não estiver vazia, processa o próximo comando
+        if (!comandoQueue.isEmpty()) {
+            char* comandoAtual = comandoQueue.pop();  // Retira um comando da fila
+            processarComando(comandoAtual);
+            free(comandoAtual);  // Libera memória alocada após uso
+        }
     }
 }
+
 
 // Processa e interpreta o comando (ex: "B90 M0 S180 G180")
 void processarComando(const char* comando) {
