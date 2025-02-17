@@ -2,6 +2,7 @@
 
 Após a primeira implementação, o prototipo foi testado utilizando o shield e foi ajustado o portmap para o funcionamento correto.
 
+![image](https://github.com/user-attachments/assets/95035ea5-10dc-44a4-be5a-47c907b548d3)
 
 
 A partir do código original, foi criado um protocolo para movimentação dos servo motores via outro dispositivo. O código tem a seguinte estrutura:
@@ -17,6 +18,7 @@ Sendo:
 Sendo que há também a possibilidade de recebimento de multiplos comandos simultâneamente, para a movimentação de mais de um motor, como por exemplo:
 
 B90 \\movimenta apenas a base para 90 graus
+
 B90 M120 S90 \\ Movimenta a base, o primeiro e o segundo eixo para os respectivos angulos.
 
 A partir desta ideia, foi criada uma função de processamento para reconhecer os códigos recebidos e executar os comandos:
